@@ -1,0 +1,6 @@
+speechrecognition
+pyaudio
+pygame
+requests
+python-dotenv
+pyqt6

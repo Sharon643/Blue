@@ -24,6 +24,9 @@ from brain.router import detect_intent
 from commands.actions import execute_command
 
 from config.settings import WAKE_WORD
+import time
+from integrations.notion_client import add_task 
+from brain.task_parser import extract_task
 
 
 class AssistantWorker(QThread):
@@ -70,7 +73,16 @@ class AssistantWorker(QThread):
                                 "Listening..."
                             )
 
+                            stt_start = time.time()
+                            total_start = time.time()
+
                             user_text = listen()
+
+                            print(
+                                "STT Time:",
+                                round(time.time() - stt_start, 2),
+                                "seconds"
+                            )
 
                             print("You:", user_text)
 
@@ -90,29 +102,25 @@ class AssistantWorker(QThread):
                             
                             # MEMORY
                            
-                            if intent == "memory":
+                            if intent == "memory_write":
 
-                                new_memory = (
-                                    extract_memory(
-                                        user_text
-                                    )
-                                )
+                                print("MEMORY WRITE")
 
-                                if new_memory:
+                                new_memory = extract_memory(user_text)
 
-                                    # SAFE MEMORY MERGE
+                                for key, value in new_memory.items():
 
-                                    for key, value in new_memory.items():
+                                    if value is not None:
 
-                                        if value is not None:
+                                        user_memory[key] = value
 
-                                            user_memory[key] = value
+                                save_user_memory(user_memory)
 
-                                    save_user_memory(
-                                        user_memory
-                                    )
+                                response = "I'll remember that."
 
-                           
+                                speak(response)
+
+                                continue
                             # COMMANDS
                         
                             elif intent == "command":
@@ -126,6 +134,17 @@ class AssistantWorker(QThread):
                                 if command_executed:
 
                                     continue
+                            elif intent == "task":
+
+                                task_name = extract_task(user_text)
+
+                                add_task(task_name)
+
+                                response = f"Task added: {task_name}"
+
+                                speak(response)
+
+                                continue
 
                             # EMPTY
                             if user_text == "":
@@ -157,8 +176,16 @@ class AssistantWorker(QThread):
                                 "Thinking..."
                             )
 
+                            ai_start = time.time()
+
                             ai_response = ask_ai(
                                 conversation_history
+                            )
+
+                            print(
+                                "AI Time:",
+                                round(time.time() - ai_start, 2),
+                                "seconds"
                             )
 
                             # SAVE AI
@@ -183,7 +210,20 @@ class AssistantWorker(QThread):
                                 "Speaking..."
                             )
 
+                            tts_start = time.time()
+
                             speak(ai_response)
+                            print(
+                                "TOTAL:",
+                                round(time.time() - total_start, 2),
+                                "seconds"
+                            )
+
+                            print(
+                                "TTS Time:",
+                                round(time.time() - tts_start, 2),
+                                "seconds"
+                            )
 
                         except Exception as e:
 

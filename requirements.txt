@@ -4,3 +4,4 @@ pygame
 requests
 python-dotenv
 pyqt6
+faster-whisper

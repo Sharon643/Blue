@@ -60,6 +60,7 @@ def ask_ai(conversation_history):
         + history
         + "\nBlue:"
     )
+    print(len(full_prompt))
 
     response = requests.post(
         "http://localhost:11434/api/generate",
@@ -67,11 +68,23 @@ def ask_ai(conversation_history):
             "model": OLLAMA_MODEL,
             "prompt": full_prompt,
             "stream": False,
+            "keep_alive": "30m",
             "options": {
-            "num_predict": 40}
+            "num_predict": 25,
+            "temperature": 0.4}
         }
     )
 
-    ai_response = response.json()["response"]
+    data = response.json()
+    # print(data)
+
+    print("\n--- OLLAMA STATS ---")
+    print("load_duration:", round(data.get("load_duration", 0) / 1e9, 2), "s")
+    print("prompt_eval_duration:", round(data.get("prompt_eval_duration", 0) / 1e9, 2), "s")
+    print("eval_duration:", round(data.get("eval_duration", 0) / 1e9, 2), "s")
+    print("eval_count:", data.get("eval_count"))
+    print("--------------------\n")
+
+    ai_response = data["response"]
 
     return ai_response

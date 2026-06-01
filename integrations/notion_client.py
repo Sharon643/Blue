@@ -11,23 +11,45 @@ TASKS_DATA_SOURCE_ID = os.getenv("TASKS_DATA_SOURCE_ID")
 notion = Client(auth=NOTION_TOKEN)
 
 
-def add_task(task_name):
+def add_task(
+    task_name,
+    priority=None,
+    due_date=None
+):
+
+    properties = {
+        "Task": {
+            "title": [
+                {
+                    "text": {
+                        "content": task_name
+                    }
+                }
+            ]
+        }
+    }
+
+    if priority:
+
+        properties["Priority"] = {
+            "select": {
+                "name": priority
+            }
+        }
+
+    if due_date:
+
+        properties["Due date"] = {
+            "date": {
+                "start": due_date
+            }
+        }
 
     notion.pages.create(
         parent={
             "database_id": TASKS_DB_ID
         },
-        properties={
-            "Task": {
-                "title": [
-                    {
-                        "text": {
-                            "content": task_name
-                        }
-                    }
-                ]
-            }
-        }
+        properties=properties
     )
 
 def get_tasks():

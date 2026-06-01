@@ -22,7 +22,7 @@ def listen():
 
         print("Listening...")
 
-        recognizer.pause_threshold = 0.5
+        recognizer.pause_threshold = 1.5
 
         recognizer.energy_threshold = 300
 

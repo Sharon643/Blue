@@ -1,12 +1,24 @@
 from integrations.notion_client import add_task, get_tasks
 
-def create_task(task_name):
-    add_task(task_name)
-    return f"Task added: {task_name}"
+def create_task(task_data):
+
+    add_task(
+        task_data["task"],
+        task_data["priority"],
+        task_data["due_date"]
+    )
+
+    return (
+        f"Task added: "
+        f"{task_data['task']}"
+    )
 
 def read_tasks():
 
     tasks = get_tasks()
+
+    # print(tasks)
+        
 
     if not tasks:
         return "You have no tasks."
@@ -16,7 +28,7 @@ def read_tasks():
     for task in tasks[:5]:
 
         try:
-            title = task["properties"]["Task name"]["title"]
+            title = task["properties"]["Task"]["title"]
 
             if title:
                 task_names.append(

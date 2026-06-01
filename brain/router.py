@@ -37,18 +37,35 @@ def detect_intent(user_text):
 
         return "command"
     
-    TASK_PHRASES = [
-    "add task",
-    "create task",
-    "add a task",
-    "create a task",
-    "remind me to"
+
+    #TASK READ AND WRITE INTENTS
+    TASK_CREATE_PHRASES = [
+        "add task",
+        "add a task",
+        "create task",
+        "create a task",
+        "remind me to"
     ]
 
-    for phrase in TASK_PHRASES:
-        if phrase in user_text.lower():
-            return "task"
+    TASK_READ_PHRASES = [
+        "what are my tasks",
+        "show my tasks",
+        "list my tasks",
+        "my tasks"
+    ]
 
+    for phrase in TASK_CREATE_PHRASES:
+
+        if phrase in text:
+            return "task_create"
+
+    for phrase in TASK_READ_PHRASES:
+
+        if phrase in text:
+            return "task_read"
+        
+    if "applied to" in text:
+        return "job_create"
     # MEMORY INTENTS
 
 

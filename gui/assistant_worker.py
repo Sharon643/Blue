@@ -26,8 +26,10 @@ from commands.actions import execute_command
 from config.settings import WAKE_WORD
 import time
 from integrations.notion_client import add_task 
-from brain.task_parser import extract_task
-
+from brain.task_parser import parse_task
+from brain.job_parser import parse_job
+from tools.task_tools import create_task , read_tasks
+from integrations.job_client import add_job_application
 
 class AssistantWorker(QThread):
 
@@ -136,13 +138,59 @@ class AssistantWorker(QThread):
                                     continue
                             elif intent == "task":
 
-                                task_name = extract_task(user_text)
+                                task_name = parse_task(user_text)
 
                                 add_task(task_name)
 
                                 response = f"Task added: {task_name}"
 
                                 speak(response)
+
+                                continue
+                            elif intent == "task_create":
+
+                                task_data = parse_task(
+                                    user_text
+                                )
+                                if not task_data["task"]:
+                                    speak("I couldn't understand the task.")
+                                    continue
+
+                                response = create_task(task_data)
+
+                                speak(response)
+
+                                continue
+
+                            elif intent == "task_read":
+
+                                response = read_tasks()
+
+                                speak(response)
+
+                                continue
+                            elif intent == "job_create":
+
+                                job_data = parse_job(
+                                    user_text
+                                )
+
+                                if not job_data:
+
+                                    speak(
+                                        "I couldn't understand the application."
+                                    )
+
+                                    continue
+
+                                add_job_application(
+                                    job_data["company"],
+                                    job_data["role"]
+                                )
+
+                                speak(
+                                    f"Application saved for {job_data['company']}"
+                                )
 
                                 continue
 
